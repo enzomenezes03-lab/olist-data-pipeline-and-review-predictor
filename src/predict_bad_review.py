@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 import joblib
+from sklearn.metrics import ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 
 logger = get_logger(__name__)
@@ -65,6 +67,18 @@ def run_model():
     x, y = prepare_features(df_with_target)
     model, x_test, y_test = train_model(x, y)
     evaluate_model(model, x_test, y_test)
+
+    disp = ConfusionMatrixDisplay.from_predictions(
+        y_test,
+        model.predict(x_test),
+        display_labels=['Bom', 'Ruim'],
+        cmap='Blues'
+    )
+    plt.title('Matriz de Confusão')
+    plt.savefig('model/confusion_matrix.png', bbox_inches='tight')
+    plt.close()
+    logger.info('Matriz de confusão salva em model/confusion_matrix.png')
+
     logger.info('Modelo inicializado com sucesso!')
     joblib.dump(model, 'model/random_forest.pkl')
     logger.info('Modelo salvo em model/random_forest.pkl')
