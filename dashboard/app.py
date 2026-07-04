@@ -1,23 +1,17 @@
 import streamlit as st
 import pandas as pd
 import joblib
-from sqlalchemy import create_engine
 from pathlib import Path
 import plotly.express as px
 
-GOLD_DB_PATH = Path('data/gold/olist_gold.db')
+DATA_PATH = Path('dashboard/fact_orders.csv')
 MODEL_PATH = Path('model/random_forest.pkl')
-
 
 
 # Funções de dados
 
-def get_engine():
-    return create_engine(f"sqlite:///{GOLD_DB_PATH}")
-
-
-def load_data(engine):
-    return pd.read_sql("SELECT * FROM fact_orders", engine)
+def load_data():
+    return pd.read_csv(DATA_PATH)
 
 
 def calc_metrics(df):
@@ -30,7 +24,6 @@ def calc_metrics(df):
     percentagem_atrasados = (pedidos_atrasados / total_pedidos) * 100
     tempo_medio_entrega = df['deliver_time_days'].mean()
     return total_pedidos, percentagem_ruins, frete_medio, percentagem_atrasados, tempo_medio_entrega
-
 
 
 # Funções de visualização
@@ -133,15 +126,13 @@ def plot_feature_importance():
     st.plotly_chart(fig, use_container_width=True)
 
 
-
 # Página
 
 st.set_page_config(page_title="Experiência do Cliente — Olist", layout="wide")
 st.title('Experiência do Cliente no E-commerce Brasileiro')
 st.caption('O que faz um cliente brasileiro ter uma experiência ruim — e dá pra prever isso?')
 
-engine = get_engine()
-df = load_data(engine)
+df = load_data()
 
 total, pct_ruins, frete_medio, pct_atrasados, tempo_entrega = calc_metrics(df)
 show_metricas(total, pct_ruins, frete_medio, pct_atrasados, tempo_entrega)
