@@ -1,12 +1,9 @@
 import streamlit as st
 import pandas as pd
-import joblib
 from pathlib import Path
 import plotly.express as px
 
 DATA_PATH = Path('dashboard/fact_orders.csv')
-MODEL_PATH = Path('model/random_forest.pkl')
-
 
 # Funções de dados
 
@@ -101,12 +98,13 @@ def plot_tempo_entrega_por_estado(df):
 
 
 def plot_feature_importance():
-    if not MODEL_PATH.exists():
-        st.info("Modelo não encontrado. Rode o script de treino para gerar o gráfico de importância.")
+    csv_path = Path('dashboard/feature_importance.csv')
+    if not csv_path.exists():
+        st.info("Dados de importância não encontrados.")
         return
-    model = joblib.load(MODEL_PATH)
-    importances = pd.Series(model.feature_importances_, index=model.feature_names_in_)
-    importances = importances.sort_values(ascending=True).tail(4)
+
+    importances = pd.read_csv(csv_path, index_col=0)['importance']
+    importances = importances.sort_values(ascending=True)
 
     nomes = {
         'sum_freight': 'Frete Total',
